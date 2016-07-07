@@ -1,5 +1,7 @@
-﻿using System;
+﻿using APM.Notice;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
@@ -9,8 +11,13 @@ using System.Web.Routing;
 
 namespace APM.Web
 {
-    public class MvcApplication : System.Web.HttpApplication
+    public class MvcApplication : System.Web.HttpApplication, ISysNoticeServiceCallback
     {
+        public void ReceiveNotice(string notice)
+        {
+            Debug.WriteLine(notice);
+        }
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -18,6 +25,11 @@ namespace APM.Web
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            SysNoticeServiceAgent sns = new SysNoticeServiceAgent(new System.ServiceModel.InstanceContext(this));
+            sns.OnLineAsync();
+
+            Debug.WriteLine("task 1");
         }
     }
 }
