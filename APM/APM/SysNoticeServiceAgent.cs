@@ -46,12 +46,12 @@ namespace APM.Notice
 
         public async Task OnLineAsync()
         {
-            Debug.WriteLine("task 0");
+            //Debug.WriteLine("task 0");
             await Task.Factory.StartNew(() =>
             {
                 base.Channel.OnLine();
             });
-            Debug.WriteLine("task 00");
+            //Debug.WriteLine("task 00");
         }
 
         public async Task OffLineAsync()
@@ -60,6 +60,16 @@ namespace APM.Notice
             {
                 base.Channel.OffLine();
             });
+        }
+
+        public void Subscribe(string name)
+        {
+            base.Channel.Subscribe(name);
+        }
+
+        public void Publish(string name, string data)
+        {
+            base.Channel.Publish(name, data);
         }
     }
 }

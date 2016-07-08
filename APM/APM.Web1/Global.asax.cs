@@ -9,13 +9,15 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 
-namespace APM.Web
+namespace APM.Web1
 {
     public class MvcApplication : System.Web.HttpApplication, ISysNoticeServiceCallback
     {
+        public static SysNoticeServiceAgent SNSAgent = null;
+
         public void ReceiveNotice(string name, string data)
         {
-            Debug.WriteLine("APM.Web ReceiveNotice-> {0} , {1}", name, data);
+            Debug.WriteLine("APM.Web1 ReceiveNotice -> {1} , {2}", name, data);
         }
 
         protected void Application_Start()
@@ -26,14 +28,10 @@ namespace APM.Web
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            SysNoticeServiceAgent sns = new SysNoticeServiceAgent(new System.ServiceModel.InstanceContext(this));
-            sns.OnLineAsync();
+            SNSAgent = new SysNoticeServiceAgent(new System.ServiceModel.InstanceContext(this));
+            SNSAgent.OnLineAsync();
 
-            sns.Subscribe("event1");
 
-            Debug.WriteLine("APM.Web Subscribe event1");
-
-            //Debug.WriteLine("task 1");
         }
     }
 }

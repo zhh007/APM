@@ -16,11 +16,17 @@ namespace APM.Notice
 
         [OperationContract(IsOneWay = true)]
         void OffLine();
+
+        [OperationContract(IsOneWay = true)]
+        void Subscribe(string name);
+
+        [OperationContract(IsOneWay = true)]
+        void Publish(string name, string data);
     }
 
     public interface ISysNoticeServiceCallback
     {
         [OperationContract(IsOneWay = true)]
-        void ReceiveNotice(string notice);
+        void ReceiveNotice(string name, string data);
     }
 }

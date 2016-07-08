@@ -7,6 +7,7 @@ using System.ServiceModel;
 using System.Text;
 using System.Timers;
 using System.Runtime.Caching;
+using System.Diagnostics;
 
 namespace APM.Admin
 {
@@ -14,32 +15,12 @@ namespace APM.Admin
     // 注意: 为了启动 WCF 测试客户端以测试此服务，请在解决方案资源管理器中选择 SysNoticeService.svc 或 SysNoticeService.svc.cs，然后开始调试。
     public class SysNoticeService : ISysNoticeService
     {
-        private Timer _timer;
-        private List<ISysNoticeServiceCallback> callbacks;
+        private static List<ISysNoticeServiceCallback> callbacks;
+        private static Dictionary<string, List<ISysNoticeServiceCallback>> subscriber = new Dictionary<string, List<ISysNoticeServiceCallback>>();
 
         public SysNoticeService()
         {
             callbacks = new List<ISysNoticeServiceCallback>();
-            _timer = new Timer(1000);
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.Start();
-        }
-
-        void _timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                ObjectCache cache = MemoryCache.Default;
-                string message = cache["sysnotice_message"] as string;
-                if (!string.IsNullOrEmpty(message))
-                {
-                    this.Send(message);
-                }
-            }
-            catch (Exception)
-            {
-                
-            }
         }
 
         public void OnLine()
@@ -54,17 +35,45 @@ namespace APM.Admin
             callbacks.Remove(callback);
         }
 
-        public void Send(string msg)
+        public void Subscribe(string name)
         {
-            foreach (var item in callbacks)
+            Debug.WriteLine(string.Format("SysNoticeService.Subscribe : {0}", name));
+            ISysNoticeServiceCallback callback = OperationContext.Current.GetCallbackChannel<ISysNoticeServiceCallback>();
+            if(!subscriber.ContainsKey(name))
             {
-                try
+                List<ISysNoticeServiceCallback> cblist = new List<ISysNoticeServiceCallback>();
+                cblist.Add(callback);
+                subscriber.Add(name, cblist);
+            }
+            else
+            {
+                List<ISysNoticeServiceCallback> cblist = subscriber[name];
+                if(cblist != null && !cblist.Contains(callback))
                 {
-                    item.ReceiveNotice(msg);
+                    cblist.Add(callback);
                 }
-                catch (Exception)
+            }
+        }
+
+        public void Publish(string name, string data)
+        {
+            Debug.WriteLine("SysNoticeService.Publish : {0} , {1}", name, data);
+            if (subscriber.ContainsKey(name))
+            {
+                List<ISysNoticeServiceCallback> cblist = subscriber[name];
+                if (cblist != null)
                 {
-                    
+                    foreach (var item in cblist)
+                    {
+                        try
+                        {
+                            item.ReceiveNotice(name, data);
+                        }
+                        catch (Exception)
+                        {
+
+                        }
+                    }
                 }
             }
         }
