@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace APM.EventBus
 {
-    public class AppEvent
+    public class EventService
     {
         private readonly static Lazy<EventBusAgent> _instance = new Lazy<EventBusAgent>(() => new EventBusAgent());
-        private static Dictionary<string, List<Action<object>>> subscriber = new Dictionary<string, List<Action<object>>>();
-
+        private static Dictionary<string, List<Action<object>>> sublist = new Dictionary<string, List<Action<object>>>();
 
         private static EventBusAgent Instance
         {
@@ -21,7 +20,7 @@ namespace APM.EventBus
             }
         }
 
-        static AppEvent()
+        static EventService()
         {
             Instance.OnProcessNotice += Instance_OnProcessNotice;
         }
@@ -30,13 +29,13 @@ namespace APM.EventBus
         {
             Debug.WriteLine("Instance_OnProcessNotice -> {0} , {1}", name, data);
             List<Action<object>> handlers = null;
-            if (!subscriber.ContainsKey(name))
+            if (!sublist.ContainsKey(name))
             {
                 handlers = new List<Action<object>>();
             }
             else
             {
-                handlers = subscriber[name];
+                handlers = sublist[name];
             }
             foreach (var handler in handlers)
             {
@@ -47,14 +46,14 @@ namespace APM.EventBus
         public static void Subscribe(string name, Action<object> handler)
         {
             List<Action<object>> handlers = null;
-            if(!subscriber.ContainsKey(name))
+            if(!sublist.ContainsKey(name))
             {
                 handlers = new List<Action<object>>();
-                subscriber.Add(name, handlers);
+                sublist.Add(name, handlers);
             }
             else
             {
-                handlers = subscriber[name];
+                handlers = sublist[name];
             }
             handlers.Add(handler);
 
@@ -71,6 +70,15 @@ namespace APM.EventBus
         {
             //var d = Activator.CreateInstance<T>();
             Instance.Publish(name, parameter.ToString());
+        }
+
+        public static void AddEvent<T>()
+            where T : IDistributedEvent, new()
+        {
+            var evt = Activator.CreateInstance<T>();
+            Subscribe(typeof(T).Name, p => {
+                evt.Process(p.ToString());
+            });
         }
     }
 }

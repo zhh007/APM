@@ -29,7 +29,8 @@ namespace APM.Web1.Controllers
 
         public ActionResult Send(string msg)
         {
-            EventBus.AppEvent.Publish("event1", msg);
+            EventBus.EventService.Publish("event1", msg);
+            EventBus.EventService.Publish("TestEvent", msg);
             return Content(msg);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using APM.EventBus;
+using APM.Web.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,9 +22,11 @@ namespace APM.Web
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            EventBus.AppEvent.Subscribe("event1", p => {
+            EventService.Subscribe("event1", p => {
                 Debug.WriteLine("APM.Web ReceiveNotice-> {0} , {1}", "event1", p.ToString());
             });
+
+            EventService.AddEvent<TestEvent>();
         }
     }
 }

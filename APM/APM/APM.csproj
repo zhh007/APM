@@ -41,8 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventBus\AppEvent.cs" />
+    <Compile Include="EventBus\EventService.cs" />
     <Compile Include="EventBus\EventBusClient.cs" />
+    <Compile Include="EventBus\IDistributedEvent.cs" />
     <Compile Include="EventBus\IEventBusService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EventBus\EventBusAgent.cs" />
