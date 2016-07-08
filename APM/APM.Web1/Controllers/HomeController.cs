@@ -29,7 +29,7 @@ namespace APM.Web1.Controllers
 
         public ActionResult Send(string msg)
         {
-            MvcApplication.SNSAgent.Publish("event1", msg);
+            EventBus.AppEvent.Publish("event1", msg);
             return Content(msg);
         }
     }

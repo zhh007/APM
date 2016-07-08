@@ -5,11 +5,10 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
 
-namespace APM.Notice
+namespace APM.EventBus
 {
-    // 注意: 使用“重构”菜单上的“重命名”命令，可以同时更改代码和配置文件中的接口名“ISysNoticeService”。
-    [ServiceContract(CallbackContract = typeof(ISysNoticeServiceCallback))]
-    public interface ISysNoticeService
+    [ServiceContract(CallbackContract = typeof(IEventBusServiceCallback))]
+    public interface IEventBusService
     {
         [OperationContract(IsOneWay = true)]
         void OnLine();
@@ -24,7 +23,7 @@ namespace APM.Notice
         void Publish(string name, string data);
     }
 
-    public interface ISysNoticeServiceCallback
+    public interface IEventBusServiceCallback
     {
         [OperationContract(IsOneWay = true)]
         void ReceiveNotice(string name, string data);

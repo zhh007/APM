@@ -1,4 +1,4 @@
-﻿using APM.Notice;
+﻿using APM.EventBus;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,13 +11,8 @@ using System.Web.Routing;
 
 namespace APM.Web
 {
-    public class MvcApplication : System.Web.HttpApplication, ISysNoticeServiceCallback
+    public class MvcApplication : System.Web.HttpApplication
     {
-        public void ReceiveNotice(string name, string data)
-        {
-            Debug.WriteLine("APM.Web ReceiveNotice-> {0} , {1}", name, data);
-        }
-
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -26,14 +21,9 @@ namespace APM.Web
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            SysNoticeServiceAgent sns = new SysNoticeServiceAgent(new System.ServiceModel.InstanceContext(this));
-            sns.OnLineAsync();
-
-            sns.Subscribe("event1");
-
-            Debug.WriteLine("APM.Web Subscribe event1");
-
-            //Debug.WriteLine("task 1");
+            EventBus.AppEvent.Subscribe("event1", p => {
+                Debug.WriteLine("APM.Web ReceiveNotice-> {0} , {1}", "event1", p.ToString());
+            });
         }
     }
 }

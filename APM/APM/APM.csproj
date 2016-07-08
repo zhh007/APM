@@ -41,9 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ISysNoticeService.cs" />
+    <Compile Include="EventBus\AppEvent.cs" />
+    <Compile Include="EventBus\EventBusClient.cs" />
+    <Compile Include="EventBus\IEventBusService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SysNoticeServiceAgent.cs" />
+    <Compile Include="EventBus\EventBusAgent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
