@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
+﻿using System.Threading.Tasks;
 
 namespace APM.EventBus
 {
-    public class EventBusClient : System.ServiceModel.DuplexClientBase<IEventBusService>, IEventBusService
+    internal class EventBusClient : System.ServiceModel.DuplexClientBase<IEventBusService>, IEventBusService
     {
         public EventBusClient(System.ServiceModel.InstanceContext callbackInstance) :
                 base(callbackInstance)
@@ -44,14 +39,14 @@ namespace APM.EventBus
             base.Channel.OnLine();
         }
 
-        public void Subscribe(string name)
+        public void Subscribe(string eventName)
         {
-            base.Channel.Subscribe(name);
+            base.Channel.Subscribe(eventName);
         }
 
-        public void Publish(string name, string data)
+        public void Publish(string eventName, string parameter)
         {
-            base.Channel.Publish(name, data);
+            base.Channel.Publish(eventName, parameter);
         }
 
         public async Task OnLineAsync()
@@ -70,19 +65,19 @@ namespace APM.EventBus
             });
         }
 
-        public async void SubscribeAsync(string name)
+        public async void SubscribeAsync(string eventName)
         {
             await Task.Factory.StartNew(() =>
             {
-                base.Channel.Subscribe(name);
+                base.Channel.Subscribe(eventName);
             });
         }
 
-        public async void PublishAsync(string name, string data)
+        public async void PublishAsync(string eventName, string parameter)
         {
             await Task.Factory.StartNew(() =>
             {
-                base.Channel.Publish(name, data);
+                base.Channel.Publish(eventName, parameter);
             });
         }
     }

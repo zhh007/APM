@@ -9,6 +9,22 @@ namespace APM.Web.Events
 {
     public class TestEvent : IDistributedEvent
     {
+        public string Detail
+        {
+            get
+            {
+                return "";
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return "";
+            }
+        }
+
         public void Process(string parameter)
         {
             Debug.WriteLine("TestEvent -> " + parameter);

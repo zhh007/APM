@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace APM.EventBus
 {
@@ -22,10 +19,11 @@ namespace APM.EventBus
 
         static EventService()
         {
-            Instance.OnProcessNotice += Instance_OnProcessNotice;
+            Instance.OnProcessEvent += EventService_OnProcessEvent;
+            Instance.OnLine();
         }
 
-        private static void Instance_OnProcessNotice(string name, string data)
+        private static void EventService_OnProcessEvent(string name, string data)
         {
             Debug.WriteLine("Instance_OnProcessNotice -> {0} , {1}", name, data);
             List<Action<object>> handlers = null;
@@ -43,21 +41,21 @@ namespace APM.EventBus
             }
         }
 
-        public static void Subscribe(string name, Action<object> handler)
+        public static void Subscribe(string eventName, Action<object> handler)
         {
             List<Action<object>> handlers = null;
-            if(!sublist.ContainsKey(name))
+            if(!sublist.ContainsKey(eventName))
             {
                 handlers = new List<Action<object>>();
-                sublist.Add(name, handlers);
+                sublist.Add(eventName, handlers);
             }
             else
             {
-                handlers = sublist[name];
+                handlers = sublist[eventName];
             }
             handlers.Add(handler);
 
-            Instance.Subscribe(name);
+            Instance.Subscribe(eventName);
         }
 
         //public static void UnSubscribe<T>(string name, Action<T> handler)
@@ -66,10 +64,10 @@ namespace APM.EventBus
         //    Instance.UnSubscribe<T>(name, handler);
         //}
 
-        public static void Publish(string name, object parameter)
+        public static void Publish(string eventName, object parameter)
         {
             //var d = Activator.CreateInstance<T>();
-            Instance.Publish(name, parameter.ToString());
+            Instance.Publish(eventName, parameter.ToString());
         }
 
         public static void AddEvent<T>()

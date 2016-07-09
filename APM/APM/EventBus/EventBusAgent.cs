@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace APM.EventBus
 {
-    public class EventBusAgent: IEventBusServiceCallback
+    internal class EventBusAgent : IEventBusServiceCallback
     {
         private EventBusClient client = null;
+        public delegate void ProcessEvent(string eventName, string parameter);
+        public event ProcessEvent OnProcessEvent;
 
         public EventBusAgent()
         {
@@ -26,28 +23,23 @@ namespace APM.EventBus
             client.OnLine();
         }
 
-        public void Subscribe(string name)
+        public void Subscribe(string eventName)
         {
-            client.Subscribe(name);
+            client.Subscribe(eventName);
         }
 
-        public void Publish(string name, string data)
+        public void Publish(string eventName, string parameter)
         {
-            client.Publish(name, data);
+            client.Publish(eventName, parameter);
         }
 
-        public void ReceiveNotice(string name, string data)
+        public void ReceiveEvent(string eventName, string parameter)
         {
-            Debug.WriteLine(" ReceiveNotice -> {0} , {1}", name, data);
-            if(this.OnProcessNotice != null)
+            Debug.WriteLine(" ReceiveEvent -> {0} , {1}", eventName, parameter);
+            if (this.OnProcessEvent != null)
             {
-                OnProcessNotice(name, data);
+                OnProcessEvent(eventName, parameter);
             }
         }
-
-        public delegate void ProcessNotice(string name, string data);
-
-        public event ProcessNotice OnProcessNotice;
-
     }
 }

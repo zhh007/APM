@@ -23,7 +23,7 @@ namespace APM.Web
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             EventService.Subscribe("event1", p => {
-                Debug.WriteLine("APM.Web ReceiveNotice-> {0} , {1}", "event1", p.ToString());
+                Debug.WriteLine("APM.Web ReceiveEvent-> {0} , {1}", "event1", p.ToString());
             });
 
             EventService.AddEvent<TestEvent>();
