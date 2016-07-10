@@ -35,7 +35,7 @@ namespace APM.EventBus
 
         public void ReceiveEvent(string eventName, string parameter)
         {
-            Debug.WriteLine(" ReceiveEvent -> {0} , {1}", eventName, parameter);
+            Debug.WriteLine(string.Format("Receive {0}, {1}.", eventName, parameter), "EventBusAgent");
             if (this.OnProcessEvent != null)
             {
                 OnProcessEvent(eventName, parameter);

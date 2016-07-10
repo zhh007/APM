@@ -42,7 +42,7 @@ namespace APM.EventBus
 
         private static void EventService_OnProcessEvent(string name, string data)
         {
-            Debug.WriteLine("Instance_OnProcessNotice -> {0} , {1}", name, data);
+            Debug.WriteLine(string.Format("Process {0}, {1}.", name, data), "EventService");
             List<Action<object>> handlers = null;
             if (!sublist.ContainsKey(name))
             {
@@ -89,7 +89,7 @@ namespace APM.EventBus
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(string.Format("发生异常"));
+                Debug.WriteLine(string.Format("发生异常,{0}", ex.Message));
             }
         }
 

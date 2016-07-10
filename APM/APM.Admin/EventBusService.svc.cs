@@ -11,35 +11,33 @@ namespace APM.Admin
     public class EventBusService : IEventBusService
     {
         private static readonly object _lock = new object();
-        private static List<EventClientInfo> callbacks = new List<EventClientInfo>();
-        private static Dictionary<string, List<IEventBusServiceCallback>> subscriber = new Dictionary<string, List<IEventBusServiceCallback>>();
+        private static List<EventClientInfo> clients = new List<EventClientInfo>();
+        private static Dictionary<string, List<IEventBusServiceCallback>> subscribers = new Dictionary<string, List<IEventBusServiceCallback>>();
 
         public EventBusService()
         {
-            Debug.WriteLine("EventBusService created: " + this.GetHashCode().ToString());
+            Debug.WriteLine(string.Format("Service {0} created.", this.GetHashCode()), "EventBusService");
         }
 
         ~EventBusService()
         {
-            Debug.WriteLine("EventBusService destroyed: " + this.GetHashCode().ToString());
+            Debug.WriteLine(string.Format("Service {0} destroyed.", this.GetHashCode()), "EventBusService");
         }
 
         public void OnLine(string clientid)
         {
             IEventBusServiceCallback callback = OperationContext.Current.GetCallbackChannel<IEventBusServiceCallback>();
-
             MessageProperties prop = OperationContext.Current.IncomingMessageProperties;
             RemoteEndpointMessageProperty endpoint = prop[RemoteEndpointMessageProperty.Name] as RemoteEndpointMessageProperty;
-            Debug.WriteLine(string.Format("client regist:{0}, {1}", endpoint.Address, endpoint.Port));
 
             EventClientInfo client = new EventClientInfo(clientid, endpoint.Address, endpoint.Port, callback);
 
             bool isadd = false;
             lock (_lock)
             {
-                if (callbacks.Count(p => p.ClientID == clientid) == 0)
+                if (clients.Count(p => p.ClientID == clientid) == 0)
                 {
-                    callbacks.Add(client);
+                    clients.Add(client);
                     isadd = true;
                 }
             }
@@ -61,13 +59,13 @@ namespace APM.Admin
             IEventBusServiceCallback callback = sender as IEventBusServiceCallback;
             lock (_lock)
             {
-                for (int i = callbacks.Count - 1; i >= 0; i--)
+                for (int i = clients.Count - 1; i >= 0; i--)
                 {
-                    var client = callbacks[i];
+                    var client = clients[i];
                     if (client.Callback == callback)
                     {
                         Debug.WriteLine(string.Format("{0}, 下线了。", client), "EventBusService");
-                        callbacks.RemoveAt(i);
+                        clients.RemoveAt(i);
                     }
                 }
             }
@@ -76,7 +74,7 @@ namespace APM.Admin
         private void Channel_Faulted(object sender, EventArgs e)
         {
             IEventBusServiceCallback callback = sender as IEventBusServiceCallback;
-            var client = callbacks.Find(c => c.Callback == callback);
+            var client = clients.Find(c => c.Callback == callback);
             Debug.WriteLine(string.Format("{0}, 通道异常。", client), "EventBusService");
         }
 
@@ -84,13 +82,13 @@ namespace APM.Admin
         {
             lock (_lock)
             {
-                for (int i = callbacks.Count - 1; i >= 0; i--)
+                for (int i = clients.Count - 1; i >= 0; i--)
                 {
-                    if (callbacks[i].ClientID == clientid)
+                    if (clients[i].ClientID == clientid)
                     {
-                        var client = callbacks[i];
+                        var client = clients[i];
                         Debug.WriteLine(string.Format("{0}, 下线了。", client), "EventBusService");
-                        callbacks.RemoveAt(i);
+                        clients.RemoveAt(i);
                     }
                 }
             }
@@ -98,17 +96,19 @@ namespace APM.Admin
 
         public void Subscribe(string eventName)
         {
-            Debug.WriteLine(string.Format("EventBusService.Subscribe : {0}", eventName));
             IEventBusServiceCallback callback = OperationContext.Current.GetCallbackChannel<IEventBusServiceCallback>();
-            if (!subscriber.ContainsKey(eventName))
+            var clientinfo = GetClientInfo(callback);
+            Debug.WriteLine(string.Format("{0} Subscribe {1}.", clientinfo, eventName), "EventBusService");
+
+            if (!subscribers.ContainsKey(eventName))
             {
                 List<IEventBusServiceCallback> cblist = new List<IEventBusServiceCallback>();
                 cblist.Add(callback);
-                subscriber.Add(eventName, cblist);
+                subscribers.Add(eventName, cblist);
             }
             else
             {
-                List<IEventBusServiceCallback> cblist = subscriber[eventName];
+                List<IEventBusServiceCallback> cblist = subscribers[eventName];
                 if (cblist != null && !cblist.Contains(callback))
                 {
                     cblist.Add(callback);
@@ -118,10 +118,13 @@ namespace APM.Admin
 
         public void Publish(string eventName, string parameter)
         {
-            Debug.WriteLine("EventBusService.Publish : {0} , {1}", eventName, parameter);
-            if (subscriber.ContainsKey(eventName))
+            IEventBusServiceCallback callback = OperationContext.Current.GetCallbackChannel<IEventBusServiceCallback>();
+            var clientinfo = GetClientInfo(callback);
+            Debug.WriteLine(string.Format("{0} Publish {1}, {2}.", clientinfo, eventName, parameter), "EventBusService");
+
+            if (subscribers.ContainsKey(eventName))
             {
-                List<IEventBusServiceCallback> cblist = subscriber[eventName];
+                List<IEventBusServiceCallback> cblist = subscribers[eventName];
                 if (cblist != null)
                 {
                     foreach (var item in cblist)
@@ -144,8 +147,8 @@ namespace APM.Admin
             EventClientInfo[] clientList = new EventClientInfo[0];
             lock (_lock)
             {
-                clientList = new EventClientInfo[callbacks.Count];
-                callbacks.CopyTo(clientList);
+                clientList = new EventClientInfo[clients.Count];
+                clients.CopyTo(clientList);
 
                 foreach (EventClientInfo registeredClient in clientList)
                 {
@@ -157,6 +160,11 @@ namespace APM.Admin
                     }
                 }
             }
+        }
+
+        private EventClientInfo GetClientInfo(IEventBusServiceCallback callback)
+        {
+            return clients.Find(p => p.Callback == callback);
         }
     }
 }

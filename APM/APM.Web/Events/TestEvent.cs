@@ -27,7 +27,7 @@ namespace APM.Web.Events
 
         public void Process(string parameter)
         {
-            Debug.WriteLine("TestEvent -> " + parameter);
+            Debug.WriteLine("APM.Web TestEvent -> " + parameter);
         }
     }
 }
