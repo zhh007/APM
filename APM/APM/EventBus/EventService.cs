@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace APM.EventBus
 {
@@ -8,7 +9,7 @@ namespace APM.EventBus
     {
         private readonly static Lazy<EventBusAgent> _instance = new Lazy<EventBusAgent>(() => new EventBusAgent());
         private static Dictionary<string, List<Action<object>>> sublist = new Dictionary<string, List<Action<object>>>();
-
+        private static string ClientID = string.Empty;
         private static EventBusAgent Instance
         {
             get
@@ -20,7 +21,23 @@ namespace APM.EventBus
         static EventService()
         {
             Instance.OnProcessEvent += EventService_OnProcessEvent;
-            Instance.OnLine();
+
+            string str = AppDomain.CurrentDomain.BaseDirectory;
+            ClientID = MD5(str);
+            Instance.OnLine(ClientID);
+        }
+
+        public static string MD5(string stringToHash)
+        {
+            var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            byte[] emailBytes = Encoding.UTF8.GetBytes(stringToHash.ToLower());
+            byte[] hashedEmailBytes = md5.ComputeHash(emailBytes);
+            StringBuilder sb = new StringBuilder();
+            foreach (var b in hashedEmailBytes)
+            {
+                sb.Append(b.ToString("x2").ToLower());
+            }
+            return sb.ToString();
         }
 
         private static void EventService_OnProcessEvent(string name, string data)
@@ -66,8 +83,14 @@ namespace APM.EventBus
 
         public static void Publish(string eventName, object parameter)
         {
-            //var d = Activator.CreateInstance<T>();
-            Instance.Publish(eventName, parameter.ToString());
+            try
+            {
+                Instance.Publish(eventName, parameter.ToString());
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(string.Format("发生异常"));
+            }
         }
 
         public static void AddEvent<T>()

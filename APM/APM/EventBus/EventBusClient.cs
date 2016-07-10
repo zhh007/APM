@@ -29,14 +29,14 @@ namespace APM.EventBus
         {
         }
 
-        public void OffLine()
+        public void OffLine(string clientid)
         {
-            base.Channel.OffLine();
+            base.Channel.OffLine(clientid);
         }
 
-        public void OnLine()
+        public void OnLine(string clientid)
         {
-            base.Channel.OnLine();
+            base.Channel.OnLine(clientid);
         }
 
         public void Subscribe(string eventName)
@@ -49,19 +49,19 @@ namespace APM.EventBus
             base.Channel.Publish(eventName, parameter);
         }
 
-        public async Task OnLineAsync()
+        public async Task OnLineAsync(string clientid)
         {
             await Task.Factory.StartNew(() =>
             {
-                base.Channel.OnLine();
+                base.Channel.OnLine(clientid);
             });
         }
 
-        public async Task OffLineAsync()
+        public async Task OffLineAsync(string clientid)
         {
             await Task.Factory.StartNew(() =>
             {
-                base.Channel.OffLine();
+                base.Channel.OffLine(clientid);
             });
         }
 

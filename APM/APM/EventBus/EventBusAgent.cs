@@ -13,14 +13,14 @@ namespace APM.EventBus
             client = new EventBusClient(new System.ServiceModel.InstanceContext(this));
         }
 
-        public void OffLine()
+        public void OffLine(string clientid)
         {
-            client.OffLine();
+            client.OffLine(clientid);
         }
 
-        public void OnLine()
+        public void OnLine(string clientid)
         {
-            client.OnLine();
+            client.OnLine(clientid);
         }
 
         public void Subscribe(string eventName)

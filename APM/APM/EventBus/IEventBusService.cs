@@ -9,13 +9,13 @@ namespace APM.EventBus
         /// 客户端上线
         /// </summary>
         [OperationContract(IsOneWay = true)]
-        void OnLine();
+        void OnLine(string clientid);
 
         /// <summary>
         /// 客户端下线
         /// </summary>
         [OperationContract(IsOneWay = true)]
-        void OffLine();
+        void OffLine(string clientid);
 
         /// <summary>
         /// 事件订阅
